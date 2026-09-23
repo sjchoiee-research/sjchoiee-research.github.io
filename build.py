@@ -7,6 +7,13 @@ P=C['profile']
 PUBS=C['publications']
 E=lambda s:html.escape(str(s if s is not None else ''),quote=True)
 NAV=[('index','Home'),('research','Research'),('publications','Publications'),('patents','Patents & Awards'),('team','Team'),('media','Media'),('about','About')]
+SITE_NAME='Sung-Jin Choi Research Group'
+SITE_URL='https://sjchoiee-research.github.io/'
+SHARE_IMAGE=SITE_URL+'assets/social/research-group-share-v1.png'
+def social_metadata(page,title,description):
+ page_title=SITE_NAME if page=='index' else title+' · '+SITE_NAME
+ canonical=SITE_URL if page=='index' else SITE_URL+page+'.html'
+ return f'''<title>{E(page_title)}</title><link rel="canonical" href="{E(canonical)}"><meta property="og:title" content="{E(page_title)}"><meta property="og:description" content="{E(description)}"><meta property="og:type" content="website"><meta property="og:site_name" content="{E(SITE_NAME)}"><meta property="og:url" content="{E(canonical)}"><meta property="og:image" content="{E(SHARE_IMAGE)}"><meta property="og:image:secure_url" content="{E(SHARE_IMAGE)}"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Sung-Jin Choi Research Group — carbon nanotube semiconductor devices"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="{E(SHARE_IMAGE)}"><meta name="twitter:title" content="{E(page_title)}"><meta name="twitter:description" content="{E(description)}">'''
 def ext(url,label,cls=''):return f'<a href="{E(url)}" target="_blank" rel="noopener noreferrer" class="{cls}">{label}</a>'
 def tl(url,label):return f'<a class="text-link" href="{E(url)}">{label}<span class="arrow" aria-hidden="true">↗</span></a>'
 def page_intro(kicker,title,desc):
@@ -22,7 +29,7 @@ def write(page,title,body,desc=None):
  scripts=f'<script>window.SITE_DATA={payload};</script>' if page in ['publications','index'] else ''
  schema=json.dumps({'@context':'https://schema.org','@type':'Person','name':P['name'],'jobTitle':'Professor','affiliation':{'@type':'CollegeOrUniversity','name':'Kookmin University'},'sameAs':[P['scholar_url'],P['lab']['url']]},ensure_ascii=False)
  doc=f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="{E(description)}"><meta name="theme-color" content="#ae1e32"><meta property="og:title" content="{E(title)} · Sung-Jin Choi"><meta property="og:description" content="{E(description)}"><meta property="og:type" content="website"><title>{E(title)} · Sung-Jin Choi</title><link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/sections.css"><script type="application/ld+json">{schema}</script></head><body>{header(page)}<main id="main">{body}</main>{footer()}{scripts}<script src="assets/app.js" defer></script></body></html>'''
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="{E(description)}"><meta name="theme-color" content="#ae1e32">{social_metadata(page,title,description)}<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/sections.css"><script type="application/ld+json">{schema}</script></head><body>{header(page)}<main id="main">{body}</main>{footer()}{scripts}<script src="assets/app.js" defer></script></body></html>'''
  (ROOT/(page+'.html')).write_text(doc,encoding='utf8')
 def byid(s):return next(p for p in PUBS if p['id']==s['publication_id'])
 def author_markup(s):
@@ -124,5 +131,5 @@ write('media','Media',media())
 write('about','About',about())
 write('credits','Sources & Credits',credits()+'<div class="wrap">'+selected_credits()+'</div>')
 (ROOT/'.nojekyll').write_text('',encoding='utf8')
-(ROOT/'404.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found · Sung-Jin Choi</title><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/sections.css"><main class="wrap"><div class="page-intro"><div class="eyebrow">404</div><h1>Page not found.</h1><p>The page may have moved.</p><p><a href="index.html" class="button">Return home ↗</a></p></div></main></html>',encoding='utf8')
+(ROOT/'404.html').write_text(f'<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">{social_metadata("404","Page not found","The requested page may have moved. Return to the Sung-Jin Choi Research Group homepage.")}<link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/sections.css"><main class="wrap"><div class="page-intro"><div class="eyebrow">404</div><h1>Page not found.</h1><p>The page may have moved.</p><p><a href="index.html" class="button">Return home ↗</a></p></div></main></html>',encoding='utf8')
 print(json.dumps({'pages':8,'publications':len(PUBS),'team':len(C['team']),'patents':len(C['patents']),'awards':len(C['awards']),'media':len(C['media'])}))
